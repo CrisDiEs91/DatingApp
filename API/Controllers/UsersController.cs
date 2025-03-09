@@ -1,8 +1,4 @@
 namespace API.Controllers;
-
-using System.Reflection.Metadata.Ecma335;
-using System.Runtime.CompilerServices;
-using System.Security.Claims;
 using API.Data;
 using API.DataEntities;
 using API.DTOs;
@@ -11,7 +7,6 @@ using API.Services;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 [Authorize]
 public class UsersController : BaseApiController
@@ -34,7 +29,7 @@ public class UsersController : BaseApiController
         return Ok(members);
     }
 
-    [HttpGet("{username}", Name ="GetByUsername")] // api/users/Calamardo
+    [HttpGet("{username}", Name = "GetByUsername")] // api/users/Calamardo
     public async Task<ActionResult<MemberResponse>> GetByUsernameAsync(string username)
     {
         var member = await _repository.GetMemberAsync(username);
@@ -87,7 +82,7 @@ public class UsersController : BaseApiController
 
         var photo = new Photo
         {
-            Url= result.SecureUrl.AbsoluteUri,
+            Url = result.SecureUrl.AbsoluteUri,
             PublicId = result.PublicId
         };
 
@@ -127,23 +122,29 @@ public class UsersController : BaseApiController
         if (await _repository.SaveAllAsync()) return NoContent();
 
         return BadRequest("There was a problem.");
-
     }
 
     [HttpDelete("photo/{photoId:int}")]
     public async Task<ActionResult> DeletePhoto(int photoId)
     {
         var user = await _repository.GetByUsernameAsync(User.GetUserName());
+
         if (user == null) return BadRequest("User not found");
+
         var photo = user.Photos.FirstOrDefault(p => p.Id == photoId);
+
         if (photo == null || photo.IsMain) return BadRequest("This photo can't be deleted");
+
         if (photo.PublicId != null)
         {
             var result = await _photoService.DeletePhotoAsync(photo.PublicId);
             if (result.Error != null) return BadRequest(result.Error.Message);
         }
+
         user.Photos.Remove(photo);
+
         if (await _repository.SaveAllAsync()) return Ok();
+
         return BadRequest("There was a problem when deleting the photo");
     }
 }
