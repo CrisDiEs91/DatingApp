@@ -27,6 +27,7 @@ public class UsersController : BaseApiController
     public async Task<ActionResult<IEnumerable<MemberResponse>>> GetAllAsync([FromQuery] UserParams userParams)
     {
         var members = await _repository.GetMembersAsync(userParams);
+        userParams.CurrentUsername = User.GetUserName();
 
         Response.AddPaginationHeader(members);
         return Ok(members);
