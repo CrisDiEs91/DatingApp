@@ -24,12 +24,24 @@ export class MemberDetailComponent implements OnInit{
   private route = inject(ActivatedRoute);
   member?: Member;
   images: GalleryItem[] = [];
-
   activeTab?: TabDirective;
   messages: Message[] = [];
-  
+
   ngOnInit(): void {
     this.loadMember();
+
+    this.route.queryParams.subscribe({
+      next: params => {
+        params['tab'] && this.selectTab(params['tab'])
+      }
+    });
+  }
+
+  selectTab(heading: string) {
+    if (this.memberTabs) {
+      const messageTab = this.memberTabs.tabs.find(t => t.heading === heading);
+      if (messageTab) messageTab.active = true;
+    }
   }
 
   onTabActivated(data: TabDirective) {
