@@ -29,6 +29,7 @@ public class Program
 
             await context.Database.MigrateAsync();
             await Seed.SeedUsersAsync(userManager, roleManger);
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM [Connections]");
         }
         catch (Exception ex)
         {
